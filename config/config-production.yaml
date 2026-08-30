@@ -1,0 +1,43 @@
+# Production deliberately fails fast until secrets, endpoints, and TLS files
+# are injected through APP_* variables or the platform secret manager.
+app:
+  env: production
+aggregation:
+  kubernetes:
+    enabled: true
+    namespace: ""
+    label_selector: platform.swagger/enabled=true
+http:
+  address: 0.0.0.0:8080
+log:
+  level: info
+  format: json
+swagger:
+  enabled: true
+  require_auth: true
+grpc:
+  enabled: false
+  address: 0.0.0.0:9090
+  reflection_enabled: false
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+database:
+  enabled: false
+  name: platform
+  schema: swagger
+  dsn: ""
+redis:
+  enabled: false
+migration:
+  auto_up: false
+  create_schema: false
+  database_url: ""
+rate_limit:
+  enabled: false
+idempotency:
+  enabled: false
+observability:
+  metrics_enabled: true
+  tracing_enabled: false

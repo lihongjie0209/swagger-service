@@ -1,0 +1,24 @@
+app:
+  env: compose
+log:
+  level: debug
+  file: /app/logs/app.log
+swagger:
+  enabled: true
+database:
+  name: platform
+  schema: swagger
+aggregation:
+  static:
+    - {name: identity-service, title: Identity, url: "http://identity-service:8080/swagger/doc.json"}
+    - {name: tenant-service, title: Tenant, url: "http://tenant-service:8080/swagger/doc.json"}
+    - {name: authorization-service, title: Authorization, url: "http://authorization-service:8080/swagger/doc.json"}
+    - {name: audit-service, title: Audit, url: "http://audit-service:8080/swagger/doc.json"}
+    - {name: config-service, title: Config, url: "http://config-service:8080/swagger/doc.json"}
+    - {name: notification-service, title: Notification, url: "http://notification-service:8080/swagger/doc.json"}
+    - {name: file-service, title: File, url: "http://file-service:8080/swagger/doc.json"}
+    - {name: scheduler-service, title: Scheduler, url: "http://scheduler-service:8080/swagger/doc.json"}
+grpc:
+  reflection_enabled: true
+cron:
+  enabled: true
