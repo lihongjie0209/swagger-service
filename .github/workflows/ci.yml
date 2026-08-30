@@ -60,7 +60,7 @@ jobs:
             buf breaking --against '.git#ref=HEAD^' --against-config buf.yaml
           fi
           make proto-check
-            - name: Validate Kubernetes manifests
+      - name: Validate Kubernetes manifests
         run: go run github.com/yannh/kubeconform/cmd/kubeconform@v0.7.0 -strict -summary deployments/*.yaml
 
   integration:
