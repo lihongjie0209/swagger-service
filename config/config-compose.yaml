@@ -21,6 +21,7 @@ aggregation:
     - {name: application-service, title: Application, url: "http://application-service:8080/swagger/doc.json"}
     - {name: dictionary-service, title: Dictionary, url: "http://dictionary-service:8080/swagger/doc.json"}
     - {name: service-registry-service, title: Service Registry, url: "http://service-registry-service:8080/swagger/doc.json"}
+    - {name: workflow-service, title: Workflow, url: "http://workflow-service:8080/swagger/doc.json"}
 grpc:
   reflection_enabled: true
 cron:
