@@ -19,6 +19,7 @@ aggregation:
     - {name: file-service, title: File, url: "http://file-service:8080/swagger/doc.json"}
     - {name: scheduler-service, title: Scheduler, url: "http://scheduler-service:8080/swagger/doc.json"}
     - {name: application-service, title: Application, url: "http://application-service:8080/swagger/doc.json"}
+    - {name: dictionary-service, title: Dictionary, url: "http://dictionary-service:8080/swagger/doc.json"}
 grpc:
   reflection_enabled: true
 cron:
