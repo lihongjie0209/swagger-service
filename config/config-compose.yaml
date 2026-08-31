@@ -26,6 +26,7 @@ aggregation:
     - {name: metering-service, title: Metering, url: "http://metering-service:8080/swagger/doc.json"}
     - {name: billing-service, title: Billing, url: "http://billing-service:8080/swagger/doc.json"}
     - {name: rule-service, title: Rules, url: "http://rule-service:8080/swagger/doc.json"}
+    - {name: data-export-service, title: Data exports, url: "http://data-export-service:8080/swagger/doc.json"}
 grpc:
   reflection_enabled: true
 cron:
