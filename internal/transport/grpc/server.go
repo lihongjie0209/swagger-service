@@ -11,9 +11,7 @@ import (
 	"strings"
 	"time"
 
-	hellov1 "github.com/lihongjie0209/swagger-service/gen/hello/v1"
 	"github.com/lihongjie0209/swagger-service/internal/auth"
-	"github.com/lihongjie0209/swagger-service/internal/buildinfo"
 	"github.com/lihongjie0209/swagger-service/internal/config"
 	"github.com/lihongjie0209/swagger-service/internal/environment"
 	apphealth "github.com/lihongjie0209/swagger-service/internal/health"
@@ -55,7 +53,6 @@ func NewServer(lc fx.Lifecycle, cfg config.Config, authService *auth.Service, he
 		options = append(options, grpc.Creds(creds))
 	}
 	grpcServer := grpc.NewServer(options...)
-	hellov1.RegisterHelloServiceServer(grpcServer, &helloServer{})
 	grpc_health_v1.RegisterHealthServer(grpcServer, &healthServer{health: healthService})
 	if cfg.GRPC.ReflectionEnabled {
 		reflection.Register(grpcServer)
@@ -94,20 +91,6 @@ func (s *Server) stop(ctx context.Context) error {
 		s.server.Stop()
 		return ctx.Err()
 	}
-}
-
-type helloServer struct {
-	hellov1.UnimplementedHelloServiceServer
-}
-
-func (*helloServer) Ping(ctx context.Context, request *hellov1.PingRequest) (*hellov1.PingResponse, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, status.FromContextError(err).Err()
-	}
-	if strings.TrimSpace(request.GetMessage()) == "" {
-		return nil, status.Error(codes.InvalidArgument, "message is required")
-	}
-	return &hellov1.PingResponse{Message: request.GetMessage(), Version: buildinfo.Version}, nil
 }
 
 type healthServer struct {
