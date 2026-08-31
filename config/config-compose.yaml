@@ -24,6 +24,7 @@ aggregation:
     - {name: workflow-service, title: Workflow, url: "http://workflow-service:8080/swagger/doc.json"}
     - {name: search-service, title: Search, url: "http://search-service:8080/swagger/doc.json"}
     - {name: metering-service, title: Metering, url: "http://metering-service:8080/swagger/doc.json"}
+    - {name: billing-service, title: Billing, url: "http://billing-service:8080/swagger/doc.json"}
 grpc:
   reflection_enabled: true
 cron:
