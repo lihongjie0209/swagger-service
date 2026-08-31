@@ -498,6 +498,9 @@ func (c Config) Validate() error {
 	if c.App.Env == "production" && c.Swagger.Enabled && !c.Swagger.RequireAuth {
 		return errors.New("swagger.require_auth must be enabled in production")
 	}
+	if c.App.Env == "production" && (strings.TrimSpace(c.Auth.JWKSURL) == "" || strings.TrimSpace(c.Auth.Issuer) == "" || strings.TrimSpace(c.Auth.Audience) == "") {
+		return errors.New("production auth requires JWKS URL, issuer, and audience")
+	}
 	if c.Aggregation.FetchTimeout <= 0 || c.Aggregation.CacheTTL <= 0 || c.Aggregation.MaxBytes <= 0 || c.Aggregation.Kubernetes.ResyncPeriod <= 0 {
 		return errors.New("aggregation requires positive fetch_timeout, cache_ttl, max_bytes, and kubernetes.resync_period")
 	}
