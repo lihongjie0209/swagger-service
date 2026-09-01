@@ -47,6 +47,21 @@ func TestConfig_ValidateJWTSecret(t *testing.T) {
 	}
 }
 
+func TestConfig_ValidateAuthorizationDependency(t *testing.T) {
+	t.Parallel()
+	cfg := Config{
+		HTTP:          HTTP{Address: "127.0.0.1:8080", RequestTimeout: time.Second},
+		Database:      Database{Name: "platform"},
+		Health:        Health{DatabaseTimeout: time.Second, RedisTimeout: time.Second},
+		User:          User{CacheTTL: time.Second, LockTTL: time.Second, LockRetryDelay: time.Millisecond},
+		Aggregation:   Aggregation{FetchTimeout: time.Second, CacheTTL: time.Second, MaxBytes: 1, Kubernetes: KubernetesDiscovery{ResyncPeriod: time.Second}},
+		Authorization: Authorization{Enabled: true},
+	}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "outbound.grpc.authorization") {
+		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
 func TestLoadWithProfile_MergesProfileThenEnvironment(t *testing.T) {
 	dir := t.TempDir()
 	base := filepath.Join(dir, "config.yaml")

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lihongjie0209/microservice-platform-go/principal"
+	platformprincipal "github.com/lihongjie0209/microservice-platform-go/principal"
 	"github.com/lihongjie0209/swagger-service/internal/auth"
 	"github.com/lihongjie0209/swagger-service/internal/config"
 	"github.com/lihongjie0209/swagger-service/internal/environment"
@@ -153,7 +153,7 @@ func authenticateGRPC(ctx context.Context, method string, service *auth.Service,
 		if len(values) == 0 || !auth.VerifyPSK(values[0], cfg.PSK.Key) {
 			return nil, status.Error(codes.Unauthenticated, "missing or invalid PSK")
 		}
-		return principal.SystemContext(ctx, "psk"), nil
+		return platformprincipal.WithContext(ctx, platformprincipal.Principal{ID: "swagger-service:psk", Type: platformprincipal.TypeServiceAccount}), nil
 	}
 	if auth.MatchesAny(method, cfg.SkipGRPCMethods) {
 		return ctx, nil
@@ -169,7 +169,7 @@ func authenticateGRPC(ctx context.Context, method string, service *auth.Service,
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "invalid or expired token")
 	}
-	return principal.WithContext(ctx, identity), nil
+	return platformprincipal.WithContext(ctx, identity), nil
 }
 
 type contextServerStream struct {

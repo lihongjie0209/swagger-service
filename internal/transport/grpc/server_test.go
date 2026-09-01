@@ -38,7 +38,7 @@ func TestAuthenticateGRPC_PSKWildcard(t *testing.T) {
 			}
 			if test.code == codes.OK {
 				value, ok := principal.FromContext(authenticated)
-				if !ok || value.ID != "psk" || value.Type != principal.TypeSystem {
+				if !ok || value.ID != "swagger-service:psk" || value.Type != principal.TypeServiceAccount {
 					t.Fatalf("principal = %#v, %v", value, ok)
 				}
 			}

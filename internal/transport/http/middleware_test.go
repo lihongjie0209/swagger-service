@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	platformauthz "github.com/lihongjie0209/microservice-platform-go/authz"
 	"github.com/lihongjie0209/microservice-platform-go/principal"
 	"github.com/lihongjie0209/swagger-service/internal/auth"
 	"github.com/lihongjie0209/swagger-service/internal/config"
@@ -60,7 +61,7 @@ func TestAuthentication_PSKPrecedesSkipAndJWT(t *testing.T) {
 			}))
 			router.POST("/api/v1/external/callback", func(c *gin.Context) {
 				value, ok := principal.FromContext(c.Request.Context())
-				if test.status == http.StatusOK && (!ok || value.ID != "psk" || value.Type != principal.TypeSystem) {
+				if test.status == http.StatusOK && (!ok || value.ID != "swagger-service:psk" || value.Type != principal.TypeServiceAccount) {
 					c.AbortWithStatus(http.StatusInternalServerError)
 					return
 				}
@@ -74,6 +75,16 @@ func TestAuthentication_PSKPrecedesSkipAndJWT(t *testing.T) {
 				t.Fatalf("status = %d, want %d", recorder.Code, test.status)
 			}
 		})
+	}
+}
+
+func TestSwaggerHTTPRequirementCoversEveryDocumentRoute(t *testing.T) {
+	t.Parallel()
+	for _, route := range []string{"/swagger/index.html", "/swagger/services", "/swagger/spec/:name"} {
+		requirement, ok := swaggerHTTPRequirement(route)
+		if !ok || requirement.Resource == "" || requirement.Action == "" || requirement.Scope != platformauthz.ScopePlatform {
+			t.Fatalf("route %q requirement = %+v, %v", route, requirement, ok)
+		}
 	}
 }
 

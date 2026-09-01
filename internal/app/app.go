@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lihongjie0209/swagger-service/internal/authorization"
 	"github.com/lihongjie0209/swagger-service/internal/cache"
 	"github.com/lihongjie0209/swagger-service/internal/catalog"
 	"github.com/lihongjie0209/swagger-service/internal/config"
@@ -39,6 +40,7 @@ func New(cfg config.Config) *fx.App {
 		fx.Provide(idempotency.New),
 		fx.Provide(observability.NewMetrics),
 		outbound.Module,
+		fx.Provide(authorization.New),
 		catalog.Module,
 		scheduler.Module,
 		grpctransport.Module,

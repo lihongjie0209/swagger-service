@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	platformauthz "github.com/lihongjie0209/microservice-platform-go/authz"
 	"github.com/lihongjie0209/swagger-service/internal/auth"
 	"github.com/lihongjie0209/swagger-service/internal/config"
 	"github.com/lihongjie0209/swagger-service/internal/health"
@@ -22,7 +23,7 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewServer(lc fx.Lifecycle, cfg config.Config, handler *Handler, swaggerHandler *SwaggerHandler, authService *auth.Service, limiter *ratelimit.Limiter, metrics *observability.Metrics, tracing *observability.Tracing, logger *slog.Logger) (*http.Server, error) {
+func NewServer(lc fx.Lifecycle, cfg config.Config, handler *Handler, swaggerHandler *SwaggerHandler, authService *auth.Service, authorizer platformauthz.Authorizer, limiter *ratelimit.Limiter, metrics *observability.Metrics, tracing *observability.Tracing, logger *slog.Logger) (*http.Server, error) {
 	if cfg.App.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -44,13 +45,13 @@ func NewServer(lc fx.Lifecycle, cfg config.Config, handler *Handler, swaggerHand
 	}
 	if cfg.Swagger.Enabled {
 		swagger := router.Group("/swagger")
-		swagger.GET("/index.html", swaggerHandler.Index)
-		protectedSwagger := swagger.Group("")
 		if cfg.Swagger.RequireAuth {
-			protectedSwagger.Use(JWT(authService, logger))
+			swagger.Use(JWT(authService, logger))
 		}
-		protectedSwagger.GET("/services", swaggerHandler.Services)
-		protectedSwagger.GET("/spec/:name", swaggerHandler.Spec)
+		swagger.Use(Authorization(cfg.Authorization.Enabled, authorizer, logger))
+		swagger.GET("/index.html", swaggerHandler.Index)
+		swagger.GET("/services", swaggerHandler.Services)
+		swagger.GET("/spec/:name", swaggerHandler.Spec)
 		router.GET("/swagger-assets/*any", gin.WrapH(swaggerFiles.Handler))
 	}
 	api := router.Group("/api/v1", RateLimit(limiter, cfg.RateLimit.IP, "ip", func(c *gin.Context) string { return c.ClientIP() }, logger), RateLimit(limiter, cfg.RateLimit.API, "api", func(c *gin.Context) string { return c.FullPath() }, logger), Authentication(authService, logger, cfg.Auth), RateLimit(limiter, cfg.RateLimit.User, "user", func(c *gin.Context) string {
