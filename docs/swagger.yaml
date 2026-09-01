@@ -13,6 +13,21 @@ definitions:
       version:
         type: string
     type: object
+  catalog.Source:
+    properties:
+      available:
+        type: boolean
+      error:
+        type: string
+      name:
+        type: string
+      origin:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   health.Dependency:
     properties:
       latency:
@@ -29,6 +44,16 @@ definitions:
       status:
         type: string
     type: object
+  httptransport.GetSwaggerSpecRequest:
+    properties:
+      name:
+        example: platform--identity-service
+        type: string
+    required:
+    - name
+    type: object
+  httptransport.ListSwaggerServicesRequest:
+    type: object
   httptransport.MeResponseBody:
     properties:
       subject:
@@ -44,12 +69,26 @@ definitions:
       request_id:
         type: string
     type: object
+  httptransport.SwaggerServicesBody:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/catalog.Source'
+        type: array
+    type: object
+  httptransport.SwaggerSpecBody:
+    properties:
+      document:
+        type: object
+      name:
+        type: string
+    type: object
 info:
   contact: {}
-  description: 'Production-oriented Go Web API scaffold. Application error codes:
-    0 success; 10000-19999 common/input; 20000-29999 authentication/authorization;
+  description: 'Discovers and aggregates platform OpenAPI documents. Application error
+    codes: 0 success; 10000-19999 common/input; 20000-29999 authentication/authorization;
     30000-39999 business; 50000-59999 infrastructure.'
-  title: Go API Template
+  title: Platform Swagger Service API
   version: "1.0"
 paths:
   /api/v1/me:
@@ -75,6 +114,90 @@ paths:
       summary: Return the authenticated subject
       tags:
       - authentication
+  /api/v1/swagger/services:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Empty request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httptransport.ListSwaggerServicesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httptransport.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/httptransport.SwaggerServicesBody'
+              type: object
+        "401":
+          description: 'Code 20001: unauthorized'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+        "403":
+          description: 'Code 20003: forbidden'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+      security:
+      - Bearer: []
+      summary: List discovered OpenAPI services
+      tags:
+      - OpenAPI aggregation
+  /api/v1/swagger/spec:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Service source name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/httptransport.GetSwaggerSpecRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/httptransport.Response'
+            - properties:
+                body:
+                  $ref: '#/definitions/httptransport.SwaggerSpecBody'
+              type: object
+        "400":
+          description: 'Code 10001: invalid request'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+        "401":
+          description: 'Code 20001: unauthorized'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+        "403":
+          description: 'Code 20003: forbidden'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+        "404":
+          description: 'Code 10004: source not found'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+        "503":
+          description: 'Code 50003: source unavailable'
+          schema:
+            $ref: '#/definitions/httptransport.Response'
+      security:
+      - Bearer: []
+      summary: Get one aggregated OpenAPI document
+      tags:
+      - OpenAPI aggregation
   /api/v1/version:
     post:
       produces:

@@ -10,9 +10,9 @@ import (
 	"github.com/lihongjie0209/swagger-service/internal/config"
 )
 
-// @title Go API Template
+// @title Platform Swagger Service API
 // @version 1.0
-// @description Production-oriented Go Web API scaffold. Application error codes: 0 success; 10000-19999 common/input; 20000-29999 authentication/authorization; 30000-39999 business; 50000-59999 infrastructure.
+// @description Discovers and aggregates platform OpenAPI documents. Application error codes: 0 success; 10000-19999 common/input; 20000-29999 authentication/authorization; 30000-39999 business; 50000-59999 infrastructure.
 // @BasePath /
 // @schemes http https
 // @securityDefinitions.apikey Bearer

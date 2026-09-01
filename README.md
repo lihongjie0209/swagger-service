@@ -32,6 +32,8 @@ metadata:
 
 聚合服务无业务数据库、Redis、事件总线和业务 gRPC 依赖。`/live` 与 `/ready` 仍可供 Kubernetes 探针使用。
 
+统一控制台通过受保护的 `POST /api/v1/swagger/services` 和 `POST /api/v1/swagger/spec` 读取目录与文档；两个接口均返回平台统一的 `{code,message,body,request_id}` 结构。原有 `/swagger/index.html` 继续作为可独立访问的 Swagger UI，不作为控制台 iframe 使用。
+
 ## 安全
 
 生产环境统一 UI 要求 Identity JWT。`/swagger/index.html` 和本地静态 UI 资源不包含业务文档，可以公开加载；服务目录和聚合文档端点受 JWT 保护，页面会提示输入 Access Token，并在后续请求中注入 Bearer Header。

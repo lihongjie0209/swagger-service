@@ -80,7 +80,13 @@ func TestAuthentication_PSKPrecedesSkipAndJWT(t *testing.T) {
 
 func TestSwaggerHTTPRequirementCoversEveryDocumentRoute(t *testing.T) {
 	t.Parallel()
-	for _, route := range []string{"/swagger/index.html", "/swagger/services", "/swagger/spec/:name"} {
+	for _, route := range []string{
+		"/swagger/index.html",
+		"/swagger/services",
+		"/swagger/spec/:name",
+		"/api/v1/swagger/services",
+		"/api/v1/swagger/spec",
+	} {
 		requirement, ok := swaggerHTTPRequirement(route)
 		if !ok || requirement.Resource == "" || requirement.Action == "" || requirement.Scope != platformauthz.ScopePlatform {
 			t.Fatalf("route %q requirement = %+v, %v", route, requirement, ok)

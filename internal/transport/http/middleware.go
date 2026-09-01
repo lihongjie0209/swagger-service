@@ -248,9 +248,11 @@ func Authorization(enabled bool, authorizer platformauthz.Authorizer, logger *sl
 
 func swaggerHTTPRequirement(route string) (platformauthz.Requirement, bool) {
 	requirements := map[string]platformauthz.Requirement{
-		"/swagger/index.html": {Resource: "swagger.document", Action: "read", Scope: platformauthz.ScopePlatform},
-		"/swagger/services":   {Resource: "swagger.document", Action: "list", Scope: platformauthz.ScopePlatform},
-		"/swagger/spec/:name": {Resource: "swagger.document", Action: "read", Scope: platformauthz.ScopePlatform},
+		"/swagger/index.html":      {Resource: "swagger.document", Action: "read", Scope: platformauthz.ScopePlatform},
+		"/swagger/services":        {Resource: "swagger.document", Action: "list", Scope: platformauthz.ScopePlatform},
+		"/swagger/spec/:name":      {Resource: "swagger.document", Action: "read", Scope: platformauthz.ScopePlatform},
+		"/api/v1/swagger/services": {Resource: "swagger.document", Action: "list", Scope: platformauthz.ScopePlatform},
+		"/api/v1/swagger/spec":     {Resource: "swagger.document", Action: "read", Scope: platformauthz.ScopePlatform},
 	}
 	requirement, ok := requirements[route]
 	return requirement, ok

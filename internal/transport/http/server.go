@@ -54,13 +54,15 @@ func NewServer(lc fx.Lifecycle, cfg config.Config, handler *Handler, swaggerHand
 		swagger.GET("/spec/:name", swaggerHandler.Spec)
 		router.GET("/swagger-assets/*any", gin.WrapH(swaggerFiles.Handler))
 	}
-	api := router.Group("/api/v1", RateLimit(limiter, cfg.RateLimit.IP, "ip", func(c *gin.Context) string { return c.ClientIP() }, logger), RateLimit(limiter, cfg.RateLimit.API, "api", func(c *gin.Context) string { return c.FullPath() }, logger), Authentication(authService, logger, cfg.Auth), RateLimit(limiter, cfg.RateLimit.User, "user", func(c *gin.Context) string {
+	api := router.Group("/api/v1", RateLimit(limiter, cfg.RateLimit.IP, "ip", func(c *gin.Context) string { return c.ClientIP() }, logger), RateLimit(limiter, cfg.RateLimit.API, "api", func(c *gin.Context) string { return c.FullPath() }, logger), Authentication(authService, logger, cfg.Auth), Authorization(cfg.Authorization.Enabled, authorizer, logger), RateLimit(limiter, cfg.RateLimit.User, "user", func(c *gin.Context) string {
 		value, _ := c.Get("subject")
 		subject, _ := value.(string)
 		return subject
 	}, logger))
 	api.POST("/version", handler.Version)
 	api.POST("/me", handler.Me)
+	api.POST("/swagger/services", swaggerHandler.ListServices)
+	api.POST("/swagger/spec", swaggerHandler.GetSpec)
 	server := &http.Server{Addr: cfg.HTTP.Address, Handler: router, ReadTimeout: cfg.HTTP.ReadTimeout, WriteTimeout: cfg.HTTP.WriteTimeout, IdleTimeout: cfg.HTTP.IdleTimeout}
 	var listener net.Listener
 	lc.Append(fx.Hook{OnStart: func(context.Context) error {
