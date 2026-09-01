@@ -79,6 +79,7 @@ definitions:
   httptransport.SwaggerSpecBody:
     properties:
       document:
+        additionalProperties: {}
         type: object
       name:
         type: string

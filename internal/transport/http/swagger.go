@@ -32,8 +32,8 @@ type GetSwaggerSpecRequest struct {
 }
 
 type SwaggerSpecBody struct {
-	Name     string          `json:"name"`
-	Document json.RawMessage `json:"document" swaggertype:"object"`
+	Name     string         `json:"name"`
+	Document map[string]any `json:"document"`
 }
 
 func (h *SwaggerHandler) Index(c *gin.Context) {
@@ -104,7 +104,12 @@ func (h *SwaggerHandler) GetSpec(c *gin.Context) {
 		Fail(c, h.logger, apperror.Unavailable("OpenAPI source unavailable", err))
 		return
 	}
-	OK(c, SwaggerSpecBody{Name: request.Name, Document: json.RawMessage(body)})
+	var document map[string]any
+	if err := json.Unmarshal(body, &document); err != nil {
+		Fail(c, h.logger, apperror.Unavailable("OpenAPI source unavailable", err))
+		return
+	}
+	OK(c, SwaggerSpecBody{Name: request.Name, Document: document})
 }
 
 const swaggerIndex = "<!doctype html><html><head><meta charset=\"utf-8\"><title>Platform APIs</title>" +

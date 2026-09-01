@@ -70,7 +70,7 @@ func TestSwaggerConsoleAPIUsesEnvelopeAndForwardsAuthorization(t *testing.T) {
 	if err := json.Unmarshal(spec.Body.Bytes(), &specResponse); err != nil {
 		t.Fatalf("decode spec response: %v", err)
 	}
-	if specResponse.Code != 0 || specResponse.Body.Name != "identity" || !json.Valid(specResponse.Body.Document) {
+	if specResponse.Code != 0 || specResponse.Body.Name != "identity" || specResponse.Body.Document["openapi"] != "3.0.3" {
 		t.Fatalf("unexpected spec response: %+v", specResponse)
 	}
 }

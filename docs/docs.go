@@ -433,7 +433,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "document": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {}
                 },
                 "name": {
                     "type": "string"
