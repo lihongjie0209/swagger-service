@@ -13,7 +13,6 @@ import (
 	"github.com/lihongjie0209/swagger-service/internal/config"
 	"github.com/lihongjie0209/swagger-service/internal/database"
 	"github.com/lihongjie0209/swagger-service/internal/eventbus"
-	"github.com/lihongjie0209/swagger-service/internal/idempotency"
 	"github.com/lihongjie0209/swagger-service/internal/logging"
 	"github.com/lihongjie0209/swagger-service/internal/migration"
 	"github.com/lihongjie0209/swagger-service/internal/observability"
@@ -37,7 +36,6 @@ func New(cfg config.Config) *fx.App {
 		DatabaseModule,
 		CacheModule,
 		eventbus.Module,
-		fx.Provide(idempotency.New),
 		fx.Provide(observability.NewMetrics),
 		outbound.Module,
 		fx.Provide(authorization.New),
