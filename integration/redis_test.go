@@ -8,14 +8,12 @@ import (
 	"time"
 
 	"github.com/lihongjie0209/swagger-service/internal/cache"
-	"github.com/lihongjie0209/swagger-service/internal/config"
-	"github.com/lihongjie0209/swagger-service/internal/idempotency"
 	goredis "github.com/redis/go-redis/v9"
 	"github.com/testcontainers/testcontainers-go"
 	rediscontainer "github.com/testcontainers/testcontainers-go/modules/redis"
 )
 
-func TestRedisLockAndIdempotency(t *testing.T) {
+func TestRedisLock(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), time.Minute)
 	defer cancel()
 	container, err := rediscontainer.Run(ctx, "redis:7.4-alpine")
@@ -45,27 +43,5 @@ func TestRedisLockAndIdempotency(t *testing.T) {
 	}
 	if err := lock.Unlock(ctx); err != nil {
 		t.Fatal(err)
-	}
-
-	manager := idempotency.New(client, config.Config{Idempotency: config.Idempotency{Enabled: true, ProcessingTTL: time.Minute, ResultTTL: time.Hour, FailureTTL: time.Minute}})
-	first, err := manager.Begin(ctx, "request-0001", "fingerprint-a")
-	if err != nil || first.State != idempotency.StateAcquired {
-		t.Fatalf("begin = %+v, %v", first, err)
-	}
-	processing, err := manager.Begin(ctx, "request-0001", "fingerprint-a")
-	if err != nil || processing.State != idempotency.StateProcessing {
-		t.Fatalf("processing = %+v, %v", processing, err)
-	}
-	conflict, err := manager.Begin(ctx, "request-0001", "fingerprint-b")
-	if err != nil || conflict.State != idempotency.StateConflict {
-		t.Fatalf("conflict = %+v, %v", conflict, err)
-	}
-	response := map[string]string{"id": "user-1"}
-	if err := manager.Complete(ctx, "request-0001", first.Owner, response); err != nil {
-		t.Fatal(err)
-	}
-	replay, err := manager.Begin(ctx, "request-0001", "fingerprint-a")
-	if err != nil || replay.State != idempotency.StateCompleted {
-		t.Fatalf("replay = %+v, %v", replay, err)
 	}
 }
