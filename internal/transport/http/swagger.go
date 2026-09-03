@@ -21,10 +21,17 @@ func NewSwaggerHandler(registry *catalog.Registry, logger *slog.Logger) *Swagger
 	return &SwaggerHandler{registry: registry, logger: logger}
 }
 
-type ListSwaggerServicesRequest struct{}
+type ListSwaggerServicesRequest struct {
+	Keyword  string `json:"keyword"`
+	Page     int    `json:"page" binding:"omitempty,min=1"`
+	PageSize int    `json:"page_size" binding:"omitempty,min=1,max=100"`
+}
 
 type SwaggerServicesBody struct {
-	Items []catalog.Source `json:"items"`
+	Items    []catalog.Source `json:"items"`
+	Total    int              `json:"total"`
+	Page     int              `json:"page"`
+	PageSize int              `json:"page_size"`
 }
 
 type GetSwaggerSpecRequest struct {
@@ -48,13 +55,25 @@ func (h *SwaggerHandler) Services(c *gin.Context) { c.JSON(http.StatusOK, h.regi
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body ListSwaggerServicesRequest true "Empty request"
+// @Param request body ListSwaggerServicesRequest true "Search and pagination"
 // @Success 200 {object} Response{body=SwaggerServicesBody}
 // @Failure 401 {object} Response "Code 20001: unauthorized"
 // @Failure 403 {object} Response "Code 20003: forbidden"
 // @Router /api/v1/swagger/services [post]
 func (h *SwaggerHandler) ListServices(c *gin.Context) {
-	OK(c, SwaggerServicesBody{Items: h.registry.List()})
+	var request ListSwaggerServicesRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		Fail(c, h.logger, apperror.Invalid("invalid request", err))
+		return
+	}
+	if request.Page == 0 {
+		request.Page = 1
+	}
+	if request.PageSize == 0 {
+		request.PageSize = 20
+	}
+	items, total := h.registry.Search(request.Keyword, request.Page, request.PageSize)
+	OK(c, SwaggerServicesBody{Items: items, Total: total, Page: request.Page, PageSize: request.PageSize})
 }
 
 func (h *SwaggerHandler) Spec(c *gin.Context) {

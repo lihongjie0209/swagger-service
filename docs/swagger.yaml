@@ -53,6 +53,16 @@ definitions:
     - name
     type: object
   httptransport.ListSwaggerServicesRequest:
+    properties:
+      keyword:
+        type: string
+      page:
+        minimum: 1
+        type: integer
+      page_size:
+        maximum: 100
+        minimum: 1
+        type: integer
     type: object
   httptransport.MeResponseBody:
     properties:
@@ -75,6 +85,12 @@ definitions:
         items:
           $ref: '#/definitions/catalog.Source'
         type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
     type: object
   httptransport.SwaggerSpecBody:
     properties:
@@ -120,7 +136,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Empty request
+      - description: Search and pagination
         in: body
         name: request
         required: true

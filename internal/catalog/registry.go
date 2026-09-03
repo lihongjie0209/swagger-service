@@ -70,10 +70,21 @@ func (r *Registry) ReplaceKubernetes(values []Source) {
 }
 
 func (r *Registry) List() []Source {
+	values, _ := r.Search("", 0, 0)
+	return values
+}
+
+// Search returns a stable page of sources matched by name or title. Non-positive
+// pagination values retain the complete-list behavior used by the standalone UI.
+func (r *Registry) Search(keyword string, page, pageSize int) ([]Source, int) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	keyword = strings.ToLower(strings.TrimSpace(keyword))
 	values := make([]Source, 0, len(r.sources))
 	for _, source := range r.sources {
+		if keyword != "" && !strings.Contains(strings.ToLower(source.Name), keyword) && !strings.Contains(strings.ToLower(source.Title), keyword) {
+			continue
+		}
 		if cached, ok := r.cache[source.Name]; ok {
 			source.Available = true
 			source.UpdatedAt = cached.updatedAt
@@ -81,7 +92,19 @@ func (r *Registry) List() []Source {
 		values = append(values, source)
 	}
 	sort.Slice(values, func(i, j int) bool { return values[i].Name < values[j].Name })
-	return values
+	total := len(values)
+	if page <= 0 || pageSize <= 0 {
+		return values, total
+	}
+	offsetPages := page - 1
+	if offsetPages > len(values)/pageSize {
+		return []Source{}, total
+	}
+	start := offsetPages * pageSize
+	if start >= len(values) {
+		return []Source{}, total
+	}
+	return values[start:min(start+pageSize, len(values))], total
 }
 
 func (r *Registry) Spec(ctx context.Context, name string) ([]byte, error) {

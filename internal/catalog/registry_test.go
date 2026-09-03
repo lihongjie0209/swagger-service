@@ -54,6 +54,24 @@ func TestRegistryRejectsNonOpenAPIDocument(t *testing.T) {
 	}
 }
 
+func TestRegistrySearchIsFilteredPagedAndOverflowSafe(t *testing.T) {
+	t.Parallel()
+	registry := NewRegistry(config.Config{Aggregation: config.Aggregation{Static: []config.SwaggerSource{
+		{Name: "tenant", Title: "Tenant API"},
+		{Name: "identity", Title: "Identity API"},
+		{Name: "authorization", Title: "Authorization API"},
+	}}}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	items, total := registry.Search(" API ", 2, 1)
+	if total != 3 || len(items) != 1 || items[0].Name != "identity" {
+		t.Fatalf("Search() = (%+v, %d)", items, total)
+	}
+	items, total = registry.Search("tenant", int(^uint(0)>>1), 100)
+	if total != 1 || len(items) != 0 {
+		t.Fatalf("overflow Search() = (%+v, %d)", items, total)
+	}
+}
+
 func testConfig() config.Config {
 	return config.Config{Aggregation: config.Aggregation{FetchTimeout: time.Second, CacheTTL: time.Minute, MaxBytes: 1 << 20}}
 }

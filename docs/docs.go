@@ -76,7 +76,7 @@ const docTemplate = `{
                 "summary": "List discovered OpenAPI services",
                 "parameters": [
                     {
-                        "description": "Empty request",
+                        "description": "Search and pagination",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -393,7 +393,21 @@ const docTemplate = `{
             }
         },
         "httptransport.ListSwaggerServicesRequest": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "keyword": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
         },
         "httptransport.MeResponseBody": {
             "type": "object",
@@ -426,6 +440,15 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/catalog.Source"
                     }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

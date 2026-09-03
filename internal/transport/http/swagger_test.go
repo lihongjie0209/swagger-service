@@ -31,7 +31,10 @@ func TestSwaggerConsoleAPIUsesEnvelopeAndForwardsAuthorization(t *testing.T) {
 		FetchTimeout: time.Second,
 		CacheTTL:     time.Minute,
 		MaxBytes:     1 << 20,
-		Static:       []config.SwaggerSource{{Name: "identity", Title: "Identity API", URL: upstream.URL}},
+		Static: []config.SwaggerSource{
+			{Name: "authorization", Title: "Authorization API", URL: upstream.URL},
+			{Name: "identity", Title: "Identity API", URL: upstream.URL},
+		},
 	}}, logger)
 	handler := NewSwaggerHandler(registry, logger)
 	gin.SetMode(gin.TestMode)
@@ -40,7 +43,9 @@ func TestSwaggerConsoleAPIUsesEnvelopeAndForwardsAuthorization(t *testing.T) {
 	router.POST("/spec", handler.GetSpec)
 
 	services := httptest.NewRecorder()
-	router.ServeHTTP(services, httptest.NewRequest(http.MethodPost, "/services", strings.NewReader(`{}`)))
+	request := httptest.NewRequest(http.MethodPost, "/services", strings.NewReader(`{"keyword":"identity","page":1,"page_size":1}`))
+	request.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(services, request)
 	if services.Code != http.StatusOK {
 		t.Fatalf("list status = %d, body = %s", services.Code, services.Body.String())
 	}
@@ -51,7 +56,7 @@ func TestSwaggerConsoleAPIUsesEnvelopeAndForwardsAuthorization(t *testing.T) {
 	if err := json.Unmarshal(services.Body.Bytes(), &listResponse); err != nil {
 		t.Fatalf("decode list response: %v", err)
 	}
-	if listResponse.Code != 0 || len(listResponse.Body.Items) != 1 || listResponse.Body.Items[0].Name != "identity" {
+	if listResponse.Code != 0 || len(listResponse.Body.Items) != 1 || listResponse.Body.Items[0].Name != "identity" || listResponse.Body.Total != 1 || listResponse.Body.Page != 1 || listResponse.Body.PageSize != 1 {
 		t.Fatalf("unexpected list response: %+v", listResponse)
 	}
 
